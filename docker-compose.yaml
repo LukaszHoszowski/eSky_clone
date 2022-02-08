@@ -1,0 +1,48 @@
+networks:
+  db_network:
+    driver: bridge
+  cache_network:
+    driver: bridge
+
+services:
+  db:
+    image: library/postgres:14.1-alpine
+    env_file:
+      - ./envs/.env.db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - db_network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - cache_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: esky:1.0
+    env_file:
+      - ./envs/.env
+    # on production delete, only for development
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    restart: "on-failure"
+    networks:
+      - db_network
+      - cache_network
+
+volumes:
+  postgres_data:
+  redisdata:

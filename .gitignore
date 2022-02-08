@@ -1,0 +1,8 @@
+.idea
+.vscode
+*.pyc
+*.sqlite3
+.coverage
+
+envs/*
+!envs/*-default
