@@ -8,11 +8,12 @@ WORKDIR /usr/src/app
 COPY Pipfile Pipfile.lock ./
 
 RUN apk update \
-    && apk add --no-cache --update --virtual .build-deps gcc postgresql-dev python3-dev musl-dev \
+    && apk add --no-cache --update --virtual .build-deps gcc musl-dev \
     && python -m pip install --upgrade pip \
     && pip install --no-cache-dir pipenv \
     && pipenv install --system \
-    && apk del --no-cache .build-deps
+    && apk del --no-cache .build-deps \
+    && mkdir -p ./docs/Flake8/
 
 COPY . ./
 
