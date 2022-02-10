@@ -11,4 +11,28 @@
 
 <div class="results">
     Wyniki:
+    <div id="results">
+
+    </div>
 </div>
+
+<script>
+    const url = '{% url "search:flights_ajax" %}';
+
+    const resultsRef = document.getElementById('results')
+    const getData = async () => {
+        const response = await fetch(url);
+        const data = await response.text();
+
+        resultsRef.innerHTML = resultsRef.innerHTML + data;
+
+        return response
+    }
+    const times = setInterval(() => {
+        getData().then(response => {
+            if (response.status === 402){
+                clearInterval(times)
+            }
+        })
+    });
+</script>

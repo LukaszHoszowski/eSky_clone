@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, FormView
+from django.utils.encoding import uri_to_iri
 
 from search.forms import SearchForm
 
@@ -20,16 +21,14 @@ class Search(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
         ctx['form'] = SearchForm(self.request.GET) if self.request.GET else SearchForm()
         return ctx
 
     def get(self, request, *args, **kwargs):
-        print(request.GET, request.content_params)
         form = SearchForm(request.GET)
-
         if form.is_valid():
-            return redirect('search:flights', )
+            return redirect(reverse('search:flights') + request.get_full_path()[1:])
+
         return super().get(request, *args, **kwargs)
 
 
@@ -40,3 +39,9 @@ class FlightsView(FormView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx['form'] = SearchForm(self.request.GET) if self.request.GET else SearchForm()
+        return ctx
+
+
+class ResultsAjaxView(TemplateView):
+    template_name = 'search/results_ajax.html'

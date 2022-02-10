@@ -1,23 +1,22 @@
-FROM python:3.10.2-alpine AS build
+FROM python:3.10.2 AS build
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV APP_CODE=/usr/src/app
 
-WORKDIR /usr/src/app
+WORKDIR $APP_CODE
 
 COPY Pipfile Pipfile.lock ./
 
-RUN apk update \
-    && apk add --no-cache --update --virtual .build-deps gcc musl-dev \
-    && python -m pip install --upgrade pip \
-    && pip install --no-cache-dir pipenv \
+RUN python -m pip install --upgrade pip \
+    && pip install pipenv \
     && pipenv install --system \
-    && apk del --no-cache .build-deps \
     && mkdir -p ./docs/Flake8/
 
 COPY . ./
 
 FROM build AS development
+CMD flake8 -v --ignore=E501 --count --output-file=./docs/Flake8/flake8.log
 CMD python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000
 
 EXPOSE 8000
